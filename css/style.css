@@ -515,6 +515,8 @@ tbody tr td:last-child { border-radius: 0 12px 12px 0; }
 }
 .link-btn:hover { background: rgba(255,255,255,.85); transform: translateY(-1px); }
 @media (prefers-color-scheme: dark) { .link-btn:hover { background: rgba(255,255,255,.18); } }
+.link-btn.delete-product-btn { margin-left: 6px; color: var(--danger); }
+.link-btn.delete-product-btn:hover { background: rgba(226,61,102,.14); }
 .inv-actions { text-align: right; }
 
 /* ==========================================================================

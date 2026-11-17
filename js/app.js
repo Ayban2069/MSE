@@ -749,6 +749,7 @@ function renderProducts(products) {
                 <td>${badge}</td>
                 <td class="inv-actions">
                     <button type="button" class="link-btn" data-action="edit" data-id="${p.id}">Edit</button>
+                    <button type="button" class="link-btn delete-product-btn" data-action="delete" data-id="${p.id}" aria-label="Delete ${escapeHtml(p.product_name)}">Delete</button>
                 </td>
             </tr>
         `;
@@ -773,6 +774,22 @@ function renderProducts(products) {
             if (product) openProductModal('edit', product);
         });
     });
+
+    wrap.querySelectorAll('button[data-action="delete"]').forEach(btn => {
+        btn.addEventListener('click', () => deleteProduct(btn.dataset.id, btn));
+    });
+}
+
+function filterInventoryProducts() {
+    const term = $('inventory-search').value.trim().toLowerCase();
+    $('inventory-clear').style.display = term ? 'inline' : 'none';
+    const filtered = term
+        ? allProducts.filter(p =>
+            (p.product_name || '').toLowerCase().includes(term) ||
+            (p.product_code || '').toLowerCase().includes(term) ||
+            (p.category || '').toLowerCase().includes(term))
+        : allProducts;
+    renderProducts(filtered);
 }
 
 function setupInventorySearch() {
@@ -782,23 +799,49 @@ function setupInventorySearch() {
 
     form.addEventListener('submit', e => {
         e.preventDefault();
-        const term = input.value.trim().toLowerCase();
-        clearLink.style.display = term ? 'inline' : 'none';
-        if (!term) { renderProducts(allProducts); return; }
-        const filtered = allProducts.filter(p =>
-            (p.product_name || '').toLowerCase().includes(term) ||
-            (p.product_code || '').toLowerCase().includes(term) ||
-            (p.category || '').toLowerCase().includes(term)
-        );
-        renderProducts(filtered);
+        filterInventoryProducts();
     });
 
     clearLink.addEventListener('click', e => {
         e.preventDefault();
         input.value = '';
-        clearLink.style.display = 'none';
-        renderProducts(allProducts);
+        filterInventoryProducts();
     });
+}
+
+async function deleteProduct(id, button) {
+    const product = allProducts.find(p => String(p.id) === id);
+    if (!product) return;
+
+    if (cart.some(item => String(item.product_id) === id)) {
+        showGlobalAlert(`<strong>Cannot delete ${escapeHtml(product.product_name)}.</strong> Remove it from the current sale first.`);
+        return;
+    }
+
+    if (!window.confirm(`Delete "${product.product_name}" from inventory? Past sales will be kept.`)) return;
+
+    button.disabled = true;
+    button.textContent = 'Deleting...';
+    try {
+        const deleted = await supabaseFetch(TABLES.PRODUCTS, {
+            method: 'DELETE',
+            query: `?id=eq.${encodeURIComponent(id)}`,
+            prefer: 'return=representation',
+        });
+        if (!deleted || !deleted.length) {
+            throw new Error('The product was not deleted. Check your database delete permissions and try again.');
+        }
+
+        allProducts = allProducts.filter(item => String(item.id) !== id);
+        filterInventoryProducts();
+        renderCheckoutProducts(allProducts);
+        await loadHomeReport();
+    } catch (err) {
+        console.error(err);
+        showGlobalAlert(`<strong>Could not delete the product.</strong><div class="alert-detail">${escapeHtml(err.message)}</div>`);
+        button.disabled = false;
+        button.textContent = 'Delete';
+    }
 }
 
 /* ---------- Add / Edit product modal ---------- */

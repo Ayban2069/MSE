@@ -44,6 +44,13 @@ create index if not exists idx_purchase_history_receipt_number on purchase_histo
 create index if not exists idx_purchase_history_purchase_date on purchase_history (purchase_date);
 create index if not exists idx_purchase_history_product_name on purchase_history (product_name);
 
+-- Keep historical sale rows when a product is removed from inventory.
+alter table purchase_history
+    drop constraint if exists purchase_history_product_id_fkey;
+alter table purchase_history
+    add constraint purchase_history_product_id_fkey
+    foreign key (product_id) references products(id) on delete set null;
+
 -- ------------------------------------------------------------
 -- users — login accounts (passwords stored as bcrypt hashes, never plain text)
 -- ------------------------------------------------------------
@@ -77,6 +84,9 @@ create policy "anon can insert products"
 
 create policy "anon can update products"
     on products for update to anon using (true) with check (true);
+
+create policy "anon can delete products"
+    on products for delete to anon using (true);
 
 -- purchase_history: read history/reports, insert new sales
 create policy "anon can select purchase_history"

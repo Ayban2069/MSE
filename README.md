@@ -8,7 +8,7 @@ verified against the database.
 Tabs once logged in:
 - **Home** — sales report + profit report (today's/month's profit, margin %, most profitable products)
 - **Checkout** — cash-register style: live search by product name or code (filters as you type, no button), tap to add to cart, adjust quantity, enter cash, see change, complete sale
-- **Inventory** — product list with search, **Add Product**, and **Edit** (including stock)
+- **Inventory** — product list with search, **Add Product**, **Edit** (including stock), and **Delete**
 - **History** — receipts grouped by transaction, with a date filter
 
 The header also shows who's logged in and a **Log Out** button.
@@ -92,11 +92,24 @@ per line. Home fetches this month's rows and computes, client-side:
 
 - **+ Add Product** opens a form for all columns and inserts a new row.
 - **Edit** on any product opens the same form pre-filled — including stock, handy for restocking without a sale.
+- **Delete** removes a product from inventory after confirmation. Existing sales are retained, with their product reference cleared. The initial `schema.sql` setup includes the required permissions and relationship.
+- For an existing Supabase database, apply this migration in the SQL Editor (the full schema setup is for initial database creation):
+
+```sql
+alter table purchase_history
+    drop constraint if exists purchase_history_product_id_fkey;
+alter table purchase_history
+    add constraint purchase_history_product_id_fkey
+    foreign key (product_id) references products(id) on delete set null;
+
+create policy "anon can delete products"
+    on products for delete to anon using (true);
+```
 - A product's name turns red when `stock_quantity <= reorder_level`.
 
 ## UI notes (liquid glass redesign)
 
-Only the front-end look changed — `js/config.js`, `schema.sql` and all Supabase logic are untouched.
+The liquid-glass redesign changed the front-end look while preserving the existing login and sales flows. Inventory deletion now also uses Supabase directly.
 
 - **Glass theme** — frosted surfaces over a soft mango/pink/sky/lime backdrop. Follows the system light/dark setting. Edit the colour tokens at the top of `css/style.css`.
 - **Page transitions** — switching tabs slides the old page out and brings the new one in, in the direction of travel. The tab bar highlight slides between tabs.
