@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#e9efff">
+<title>Steff Store</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ============================= ICONS + SHARED SVG DEFS ============================= -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+        <linearGradient id="g-mango" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ffc24d"/>
+            <stop offset="1" stop-color="#ff8a00"/>
+        </linearGradient>
+    </defs>
+    <symbol id="i-store" viewBox="0 0 48 48">
+        <path d="M7 21h34v19a3 3 0 0 1-3 3H10a3 3 0 0 1-3-3z" fill="rgba(255,255,255,.7)"/>
+        <rect x="19" y="27" width="10" height="16" rx="2" fill="rgba(109,74,255,.35)"/>
+        <path d="M4 16 9 6h30l5 10a4 4 0 0 1-8 0 4 4 0 0 1-8 0 4 4 0 0 1-8 0 4 4 0 0 1-8 0 4 4 0 0 1-8 0z" fill="url(#g-mango)"/>
+        <path d="M9 6h30" stroke="#fff" stroke-opacity=".7" stroke-width="1.5" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5M5.5 10v9.5h13V10M10 19.5v-5h4v5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-cart" viewBox="0 0 24 24"><path d="M3 4h2.6l2.3 10.2h9.6L20 7.5H7M9.5 19.2h.01M17 19.2h.01" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><path d="m12 3 8 4.2v9.6L12 21l-8-4.2V7.2zM4 7.2l8 4.3 8-4.3M12 11.5V21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4h4M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24"><path d="M10 4.5H6.5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2H10M15 8l4 4-4 4M19 12H9.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><path d="m20 20-4.2-4.2M10.5 17a6.5 6.5 0 1 1 0-13 6.5 6.5 0 0 1 0 13z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+</svg>
+
+<!-- ============================= AMBIENT BACKDROP (what the glass refracts) ============================= -->
+<div class="backdrop" aria-hidden="true">
+    <i class="blob b-mango"></i>
+    <i class="blob b-pink"></i>
+    <i class="blob b-sky"></i>
+    <i class="blob b-lime"></i>
+    <i class="blob b-ube"></i>
+    <i class="grain"></i>
+</div>
+
+<!-- ============================= LOGIN SCREEN ============================= -->
+<div id="login-screen">
+    <div class="login-card glass glass-lg">
+        <div class="login-brand">
+            <svg class="brand-mark" aria-hidden="true"><use href="#i-store"/></svg>
+            <h1>Steff Store</h1>
+        </div>
+        <p class="login-subtitle">Sign in to continue</p>
+
+        <form id="login-form">
+            <label>Username
+                <input type="text" id="login-username" autocomplete="username" required>
+            </label>
+            <label>Password
+                <input type="password" id="login-password" autocomplete="current-password" required>
+            </label>
+
+            <div id="login-alert" class="alert alert-error" style="display:none;" role="alert"></div>
+
+            <button type="submit" id="login-btn" class="primary-btn login-submit">Log In</button>
+        </form>
+
+        <form id="register-form" style="display:none;">
+            <label>Full name
+                <input type="text" id="register-full-name" autocomplete="name" required>
+            </label>
+            <label>Username
+                <input type="text" id="register-username" autocomplete="username" required>
+            </label>
+            <label>Password
+                <input type="password" id="register-password" autocomplete="new-password" minlength="6" required>
+            </label>
+            <label>Confirm password
+                <input type="password" id="register-password-confirm" autocomplete="new-password" minlength="6" required>
+            </label>
+
+            <div id="register-alert" class="alert alert-error" style="display:none;" role="alert"></div>
+
+            <button type="submit" id="register-btn" class="primary-btn login-submit">Create Account</button>
+        </form>
+
+        <button type="button" id="register-toggle-btn" class="login-toggle-btn">Create a new account</button>
+    </div>
+</div>
+
+<!-- ============================= APP SHELL (hidden until logged in) ============================= -->
+<div id="app-shell" style="display:none;">
+
+<header class="topbar">
+    <div class="brand glass glass-pill">
+        <svg class="brand-mark" aria-hidden="true"><use href="#i-store"/></svg>
+        <h1>Steff Store</h1>
+    </div>
+
+    <nav class="tabs glass glass-pill" aria-label="Main">
+        <span class="tab-indicator" id="tab-indicator" aria-hidden="true"></span>
+        <button class="tab-btn active" data-tab="home"><svg aria-hidden="true"><use href="#i-home"/></svg><span>Home</span></button>
+        <button class="tab-btn" data-tab="checkout"><svg aria-hidden="true"><use href="#i-cart"/></svg><span>Checkout</span></button>
+        <button class="tab-btn" data-tab="inventory"><svg aria-hidden="true"><use href="#i-box"/></svg><span>Inventory</span></button>
+        <button class="tab-btn" data-tab="history"><svg aria-hidden="true"><use href="#i-clock"/></svg><span>History</span></button>
+    </nav>
+
+    <div class="session-info glass glass-pill">
+        <span class="session-avatar" id="session-avatar" aria-hidden="true">S</span>
+        <span class="session-text">
+            <strong id="session-name">—</strong>
+            <span class="session-role" id="session-role">—</span>
+        </span>
+        <button id="logout-btn" class="logout-btn" type="button" aria-label="Log out" title="Log out">
+            <svg aria-hidden="true"><use href="#i-logout"/></svg>
+        </button>
+    </div>
+</header>
+
+<main class="content">
+
+    <div id="global-alert" class="alert alert-error" style="display:none;" role="alert"></div>
+
+    <!-- ============================= HOME TAB ============================= -->
+    <section id="home" class="tab-panel active">
+        <div class="page-head">
+            <h2>Sales Report</h2>
+            <p class="page-sub" id="home-greeting"></p>
+        </div>
+
+        <div class="stat-grid" id="stat-grid">
+            <div class="stat-card glass glass-lit">
+                <span class="stat-label">Today's Sales</span>
+                <span class="stat-value" id="stat-today-sales">—</span>
+            </div>
+            <div class="stat-card glass glass-lit">
+                <span class="stat-label">Today's Transactions</span>
+                <span class="stat-value" id="stat-today-transactions">—</span>
+            </div>
+            <div class="stat-card glass glass-lit">
+                <span class="stat-label">This Month's Sales</span>
+                <span class="stat-value" id="stat-month-sales">—</span>
+            </div>
+            <div class="stat-card glass glass-lit">
+                <span class="stat-label">Total Products</span>
+                <span class="stat-value" id="stat-total-products">—</span>
+            </div>
+            <div class="stat-card glass glass-lit" id="stat-low-stock-card">
+                <span class="stat-label">Low Stock Items</span>
+                <span class="stat-value" id="stat-low-stock">—</span>
+            </div>
+        </div>
+
+        <div class="panel-row">
+            <div class="panel-box glass">
+                <h3>Sales — Last 7 Days</h3>
+                <div class="bar-chart" id="bar-chart">
+                    <p class="empty-msg">Loading...</p>
+                </div>
+            </div>
+
+            <div class="panel-box glass">
+                <h3>Top Selling Products</h3>
+                <div id="top-products-wrap">
+                    <p class="empty-msg">Loading...</p>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="section-heading">Profit Report</h2>
+
+        <div class="stat-grid stat-grid-3">
+            <div class="stat-card stat-profit glass glass-lit">
+                <span class="stat-label">Today's Profit</span>
+                <span class="stat-value" id="stat-today-profit">—</span>
+            </div>
+            <div class="stat-card stat-profit glass glass-lit">
+                <span class="stat-label">This Month's Profit</span>
+                <span class="stat-value" id="stat-month-profit">—</span>
+            </div>
+            <div class="stat-card stat-profit glass glass-lit">
+                <span class="stat-label">This Month's Margin</span>
+                <span class="stat-value" id="stat-month-margin">—</span>
+            </div>
+        </div>
+
+        <div class="panel-box glass">
+            <h3>Most Profitable Products — This Month</h3>
+            <div id="profit-table-wrap">
+                <p class="empty-msg">Loading...</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================= CHECKOUT TAB ============================= -->
+    <section id="checkout" class="tab-panel">
+        <div class="page-head">
+            <h2>Checkout</h2>
+        </div>
+
+        <div class="pos-layout">
+            <div class="pos-products">
+                <div class="search-bar glass glass-pill">
+                    <svg class="search-icon" aria-hidden="true"><use href="#i-search"/></svg>
+                    <input type="text" id="checkout-search" placeholder="Type a product name or product code..." autocomplete="off">
+                </div>
+                <div class="pos-product-grid" id="checkout-product-grid">
+                    <p class="empty-msg">Loading products...</p>
+                </div>
+            </div>
+
+            <aside class="pos-cart glass glass-lg" id="pos-cart">
+                <div class="cart-head">
+                    <h3>Current Sale</h3>
+                    <span class="cart-count" id="cart-count">0 items</span>
+                </div>
+
+                <!-- The literal cart. Items you tap drop into the basket. -->
+                <div class="cart-stage" id="cart-stage" aria-hidden="true">
+                    <div class="cart-rig" id="cart-rig">
+                        <svg class="cart-svg" viewBox="0 0 240 170" width="240" height="170">
+                            <polygon points="44,34 222,34 206,104 62,104" class="cart-inner"/>
+                        </svg>
+                        <div class="cart-contents" id="cart-contents"></div>
+                        <div class="cart-glass"></div>
+                        <svg class="cart-svg" viewBox="0 0 240 170" width="240" height="170">
+                            <g class="cart-mesh">
+                                <path d="M73.7 34 86 104M103.3 34 110 104M133 34 134 104M162.7 34 158 104M192.3 34 182 104"/>
+                                <path d="M49.9 57H216.7M55.8 80H211.5"/>
+                            </g>
+                            <g class="cart-frame">
+                                <path d="M46 38 70 118"/>
+                                <path d="M70 118H198"/>
+                                <path d="M84 118V130M184 118V130"/>
+                                <path d="M76 104 78 118M192 104 190 118"/>
+                            </g>
+                            <path class="cart-basket" d="M44 34 62 104H206L222 34"/>
+                            <path class="cart-handle" d="M8 14H31Q36 14 38 19L46 38"/>
+                            <path class="cart-rim" d="M40 34H226"/>
+                            <g class="wheel" id="wheel-a"><circle cx="84" cy="142" r="12"/><circle cx="84" cy="142" r="4.5" class="hub"/><path d="M84 132v20M74 142h20"/></g>
+                            <g class="wheel" id="wheel-b"><circle cx="184" cy="142" r="12"/><circle cx="184" cy="142" r="4.5" class="hub"/><path d="M184 132v20M174 142h20"/></g>
+                        </svg>
+                    </div>
+                    <div class="cart-shadow"></div>
+                </div>
+
+                <div class="cart-items" id="cart-items">
+                    <p class="empty-msg">Cart is empty. Search and tap a product to add it.</p>
+                </div>
+
+                <div class="cart-summary">
+                    <div class="cart-total-row cart-total-main">
+                        <span>Total</span>
+                        <span id="cart-total">₱0.00</span>
+                    </div>
+
+                    <div class="cart-cash-row">
+                        <label for="cash-received">Cash Received</label>
+                        <input type="number" id="cash-received" min="0" step="0.01" placeholder="0.00" inputmode="decimal">
+                    </div>
+
+                    <div class="cart-total-row">
+                        <span>Change</span>
+                        <span id="cart-change">₱0.00</span>
+                    </div>
+
+                    <button id="checkout-btn" class="checkout-btn" disabled>Complete Sale</button>
+                    <button id="void-btn" class="void-btn" type="button">Void Sale</button>
+
+                    <div id="checkout-alert" class="alert alert-error" style="display:none;" role="alert"></div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- Mobile-only floating cart button (flying items land here when the cart is off-screen) -->
+        <button type="button" class="cart-fab glass glass-pill" id="cart-fab" aria-label="Show current sale">
+            <svg aria-hidden="true"><use href="#i-cart"/></svg>
+            <span class="cart-fab-count" id="cart-fab-count">0</span>
+        </button>
+
+        <div id="receipt-modal-backdrop" class="modal-backdrop" style="display:none;">
+            <div class="modal receipt-modal" role="dialog" aria-modal="true" aria-label="Receipt">
+                <div id="receipt-modal-content"></div>
+                <div class="modal-actions">
+                    <button id="receipt-print-btn" class="secondary-btn">Print</button>
+                    <button id="receipt-close-btn" class="primary-btn">New Sale</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================= INVENTORY TAB ============================= -->
+    <section id="inventory" class="tab-panel">
+        <div class="section-header-row">
+            <div class="page-head"><h2>Inventory</h2></div>
+            <button id="add-product-btn" class="primary-btn"><svg aria-hidden="true"><use href="#i-plus"/></svg>Add Product</button>
+        </div>
+
+        <form class="search-bar glass glass-pill" id="inventory-search-form">
+            <svg class="search-icon" aria-hidden="true"><use href="#i-search"/></svg>
+            <input type="text" id="inventory-search" placeholder="Search by product name, code, or category..." autocomplete="off">
+            <button type="submit" class="secondary-btn">Search</button>
+            <a href="#" id="inventory-clear" class="clear-link" style="display:none;">Clear</a>
+        </form>
+
+        <div id="inventory-table-wrap">
+            <p class="empty-msg">Loading products...</p>
+        </div>
+    </section>
+
+    <!-- Product add/edit modal -->
+    <div id="product-modal-backdrop" class="modal-backdrop" style="display:none;">
+        <div class="modal glass glass-lg" role="dialog" aria-modal="true" aria-labelledby="product-modal-title">
+            <h3 id="product-modal-title">Add Product</h3>
+            <form id="product-form">
+                <input type="hidden" id="product-id">
+
+                <label>Product Code
+                    <input type="text" id="field-product_code" required>
+                </label>
+                <label>Product Name
+                    <input type="text" id="field-product_name" required>
+                </label>
+                <label>Category
+                    <input type="text" id="field-category">
+                </label>
+                <div class="form-row">
+                    <label>Price (₱)
+                        <input type="number" id="field-price" min="0" step="0.01" required>
+                    </label>
+                    <label>Cost (₱)
+                        <input type="number" id="field-cost" min="0" step="0.01" required>
+                    </label>
+                </div>
+                <div class="form-row">
+                    <label>Stock Quantity
+                        <input type="number" id="field-stock_quantity" min="0" step="1" required>
+                    </label>
+                    <label>Reorder Level
+                        <input type="number" id="field-reorder_level" min="0" step="1">
+                    </label>
+                </div>
+
+                <div id="product-form-alert" class="alert alert-error" style="display:none;" role="alert"></div>
+
+                <div class="modal-actions">
+                    <button type="button" id="product-cancel-btn" class="secondary-btn">Cancel</button>
+                    <button type="submit" id="product-save-btn" class="primary-btn">Save Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================= HISTORY TAB ============================= -->
+    <section id="history" class="tab-panel">
+        <div class="page-head">
+            <h2>Purchase History</h2>
+        </div>
+
+        <form class="search-bar glass glass-pill" id="history-filter-form">
+            <label for="history-date">Filter by date</label>
+            <input type="date" id="history-date">
+            <button type="submit" class="secondary-btn">Filter</button>
+            <a href="#" id="history-clear" class="clear-link" style="display:none;">Clear</a>
+        </form>
+
+        <div id="receipt-list-wrap">
+            <p class="empty-msg">Loading receipts...</p>
+        </div>
+    </section>
+
+</main>
+
+<footer class="footer">
+    <p>&copy; <span id="footer-year"></span> Steff Store. All rights reserved.</p>
+</footer>
+
+</div><!-- /app-shell -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
