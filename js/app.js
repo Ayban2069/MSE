@@ -797,6 +797,8 @@ function setupInventorySearch() {
     const input = $('inventory-search');
     const clearLink = $('inventory-clear');
 
+    input.addEventListener('input', filterInventoryProducts);
+
     form.addEventListener('submit', e => {
         e.preventDefault();
         filterInventoryProducts();
